@@ -65,6 +65,12 @@ For outbound calls, run the printed command, for example:
 python outbound.py --to +15551234567 --from +15557654321 --proxy <ngrok-host>
 ```
 
+## Credits and links
+
+- Based on the Pipecat quickstart phone bot. Original repo: `https://github.com/pipecat-ai/pipecat-quickstart-phone-bot`
+- Join the Pipecat community on Discord: `https://discord.gg/pipecat`
+- Walkthrough video: `https://youtu.be/wjeAYO6e4ac`
+
 ### Test Your Phone Bot
 
 **Call your Twilio phone number** to start talking with your AI bot! 🚀
@@ -85,13 +91,6 @@ python outbound.py --to +15551234567 --from +15557654321 --proxy <ngrok-host>
 3. **WebSocket**: Your server establishes real-time audio connection via Websocket and exchanges Media Streams with Twilio
 4. **Processing**: Audio flows through your Pipecat Pipeline
 5. **Response**: Synthesized speech streams back to caller
-
-## Next Steps
-
-- **Deploy to production**: Replace ngrok with a proper server deployment
-- **Explore other telephony providers**: Try [Telnyx](https://github.com/pipecat-ai/pipecat-examples/tree/main/telnyx-chatbot) or [Plivo](https://github.com/pipecat-ai/pipecat-examples/tree/main/plivo-chatbot) examples
-- **Advanced telephony features**: Check out [pipecat-examples](https://github.com/pipecat-ai/pipecat-examples) for call recording, transfer, and more
-- **Join Discord**: Connect with other developers on [Discord](https://discord.gg/pipecat)
 
 ## Outbound calls (Twilio → phone)
 
@@ -128,9 +127,6 @@ python setup_ngrok_twilio.py
 
 # Or pick a specific number and auto-launch the bot
 python setup_ngrok_twilio.py --to +15551234567 --launch-bot
-
-# If you only want to update Twilio and exit without keeping ngrok running:
-python setup_ngrok_twilio.py --no-stay-running
 ```
 
 Environment:
