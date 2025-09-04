@@ -16,8 +16,8 @@ This example requires running both a server and ngrok tunnel in **two separate t
 ### Clone this repository
 
 ```bash
-git clone https://github.com/pipecat-ai/pipecat-quickstart-phone-bot.git
-cd pipecat-quickstart-phone-bot
+git clone https://github.com/HugoPodworski/first-pipecat-agent.git
+cd first-pipecat-agent
 ```
 
 ### Terminal 1: Start ngrok and Configure Twilio
@@ -44,25 +44,19 @@ cd pipecat-quickstart-phone-bot
  
 ### Terminal 2: Server Setup
 
-1. Configure environment variables
-
-   Create a `.env` file:
+1. Create `.env` and add your API keys
 
    ```bash
    cp env.example .env
+   # Edit .env and fill in:
+   # DEEPGRAM_API_KEY=...
+   # CARTESIA_API_KEY=...
+   # CEREBRAS_API_KEY=...   # or OPENAI_API_KEY if you switch models
+   # TWILIO_ACCOUNT_SID=... # optional but recommended
+   # TWILIO_AUTH_TOKEN=...  # optional but recommended
    ```
 
-   Then, add your API keys:
-
-   ```
-   DEEPGRAM_API_KEY=your_deepgram_api_key
-   OPENAI_API_KEY=your_openai_api_key or CEREBRAS_API_KEY=your_cerebras_api_key
-   CARTESIA_API_KEY=your_cartesia_api_key
-   ```
-
-   > Optional: Add your `TWILIO_ACCOUNT_SID` and `TWILIO_AUTH_TOKEN` to enable auto-hangup.
-
-2. Set up a virtual environment and install dependencies:
+2. Create a virtual environment and install dependencies
 
    ```bash
    python -m venv .venv
@@ -70,15 +64,24 @@ cd pipecat-quickstart-phone-bot
    pip install -r requirements.txt
    ```
 
-   > Using `uv`? Create your venv using: `uv sync`
-
-3. Run the Application
+3. Configure ngrok + Twilio (guided helper)
 
    ```bash
-   python bot.py --transport twilio --proxy your_ngrok.ngrok.io
+   python setup_ngrok_twilio.py
    ```
 
-   > Using `uv`? Run using: `uv run bot.py --transport twilio --proxy your_ngrok.ngrok.io`
+   - Pick the Twilio number you want to use
+   - The script starts ngrok and prints the public URL
+   - It updates your Twilio number to POST to `https://<ngrok-host>/`
+   - It optionally writes `PIPECAT_PROXY_HOST=<ngrok-host>` to `.env`
+
+4. Run the bot using the printed ngrok host
+
+   ```bash
+   python bot.py --transport twilio --proxy <ngrok-host>
+   ```
+
+   > Using `uv`? Run using: `uv run bot.py --transport twilio --proxy <ngrok-host>`
 
    > 💡 First run note: The initial startup may take ~15 seconds as Pipecat downloads required models, like the Silero VAD model.
 
