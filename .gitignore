@@ -162,3 +162,4 @@ runpod.toml
 
 # Examples
 templates/streams.xml
+.git.bak*

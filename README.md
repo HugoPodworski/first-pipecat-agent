@@ -1,4 +1,4 @@
-# Phone Bot Twilio
+# First Pipecat Phone Bot (Twilio)
 
 Learn how to connect your Pipecat bot to a phone number so users can call and have voice conversations. This example shows the complete setup for telephone-based AI interactions using Twilio's telephony services. At the end, you'll be able to talk to your bot on the phone.
 
@@ -41,15 +41,7 @@ cd pipecat-quickstart-phone-bot
      - Enter your ngrok URL: `https://your-ngrok-url.ngrok.io`
      - Ensure "HTTP POST" is selected
    - Click Save at the bottom of the page
-
-3. Configure streams.xml:
-   - Copy the template file to create your local version:
-     ```bash
-     cp templates/streams.xml.template templates/streams.xml
-     ```
-   - In `templates/streams.xml`, replace `<your_server_url>` with your ngrok URL (without `https://`)
-   - The final URL should look like: `wss://abc123.ngrok.io/ws`
-
+ 
 ### Terminal 2: Server Setup
 
 1. Configure environment variables
@@ -64,7 +56,7 @@ cd pipecat-quickstart-phone-bot
 
    ```
    DEEPGRAM_API_KEY=your_deepgram_api_key
-   OPENAI_API_KEY=your_openai_api_key
+   OPENAI_API_KEY=your_openai_api_key or CEREBRAS_API_KEY=your_cerebras_api_key
    CARTESIA_API_KEY=your_cartesia_api_key
    ```
 
@@ -98,10 +90,10 @@ cd pipecat-quickstart-phone-bot
 
 ## Troubleshooting
 
-- **Call doesn't connect**: Verify your ngrok URL is correctly set in both Twilio webhook and `streams.xml`
+- **Call doesn't connect**: Verify your ngrok URL is correctly set in the Twilio webhook
 - **No audio or bot doesn't respond**: Check that all API keys are correctly set in your `.env` file
 - **Webhook errors**: Ensure your server is running and ngrok tunnel is active before making calls
-- **ngrok tunnel issues**: Free ngrok URLs change each restart - remember to update both Twilio and `streams.xml`
+- **ngrok tunnel issues**: Free ngrok URLs change each restart - remember to update Twilio
 
 ## Understanding the Call Flow
 
@@ -117,3 +109,54 @@ cd pipecat-quickstart-phone-bot
 - **Explore other telephony providers**: Try [Telnyx](https://github.com/pipecat-ai/pipecat-examples/tree/main/telnyx-chatbot) or [Plivo](https://github.com/pipecat-ai/pipecat-examples/tree/main/plivo-chatbot) examples
 - **Advanced telephony features**: Check out [pipecat-examples](https://github.com/pipecat-ai/pipecat-examples) for call recording, transfer, and more
 - **Join Discord**: Connect with other developers on [Discord](https://discord.gg/pipecat)
+
+## Outbound calls (Twilio → phone)
+
+You can also place outbound calls that connect the callee to your running Pipecat bot.
+
+Prereqs:
+- Your server must be running locally: `python bot.py --transport twilio --proxy your_ngrok.ngrok.io`
+- Your ngrok tunnel must be active and public (same host you pass via `--proxy`)
+- `TWILIO_ACCOUNT_SID` and `TWILIO_AUTH_TOKEN` set in your environment
+- A Twilio phone number to place calls from
+
+Make the call:
+
+```bash
+python outbound.py --to +15551234567 --from +15557654321 --proxy your_ngrok.ngrok.io
+```
+
+Notes:
+- The script sends Twilio to `https://<proxy>/` with HTTP POST. The Pipecat runner responds with the XML that instructs Twilio to open a Media Streams WebSocket to `wss://<proxy>/ws`.
+- You can override the webhook URL directly with `--url https://example.com/` if you host the runner elsewhere.
+
+## Auto-configure Twilio + ngrok
+
+Use this helper to:
+- Start an ngrok tunnel
+- Pick which Twilio number to configure
+- Set "A call comes in" webhook to your ngrok URL (HTTP POST)
+- Optionally set "Primary handler fails" to the same URL
+- Optionally write `PIPECAT_PROXY_HOST` to `.env`
+
+```bash
+# Persistent tunnel by default; choose number interactively
+python setup_ngrok_twilio.py
+
+# Or pick a specific number and auto-launch the bot
+python setup_ngrok_twilio.py --to +15551234567 --launch-bot
+
+# If you only want to update Twilio and exit without keeping ngrok running:
+python setup_ngrok_twilio.py --no-stay-running
+```
+
+Environment:
+- `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` required
+- `NGROK_AUTHTOKEN` recommended for reliability
+- `NGROK_REGION` optional (e.g. `us`)
+
+After it prints the public URL, start the bot in another terminal (if you didn't use --launch-bot):
+
+```bash
+python bot.py --transport twilio --proxy <ngrok-host>
+```
