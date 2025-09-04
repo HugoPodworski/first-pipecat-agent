@@ -9,81 +9,58 @@ Learn how to connect your Pipecat bot to a phone number so users can call and ha
 - [Twilio Account](https://www.twilio.com/login) and [phone number](https://help.twilio.com/articles/223135247-How-to-Search-for-and-Buy-a-Twilio-Phone-Number-from-Console)
 - AI Service API keys for: [Deepgram](https://console.deepgram.com/signup), [OpenAI](https://auth.openai.com/create-account), and [Cartesia](https://play.cartesia.ai/sign-up)
 
-## Setup
+## Quick Start
 
-This example requires running both a server and ngrok tunnel in **two separate terminal windows**.
-
-### Clone this repository
+1) Clone and enter the repo
 
 ```bash
 git clone https://github.com/HugoPodworski/first-pipecat-agent.git
 cd first-pipecat-agent
 ```
 
-### Terminal 1: Start ngrok and Configure Twilio
+2) Create `.env` and add your API keys
 
-1. Start ngrok:
+```bash
+cp env.example .env
+# Fill in .env with your keys:
+# DEEPGRAM_API_KEY=...
+# CARTESIA_API_KEY=...
+# CEREBRAS_API_KEY=...   # or OPENAI_API_KEY if you switch models
+# TWILIO_ACCOUNT_SID=...
+# TWILIO_AUTH_TOKEN=...
+```
 
-   In a new terminal, start ngrok to tunnel the local server:
+3) Install dependencies
 
-   ```bash
-   ngrok http 7860
-   ```
+```bash
+python -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+```
 
-   > Want a fixed ngrok URL? Use the `--subdomain` flag:
-   > `ngrok http --subdomain=your_ngrok_name 7860`
+4) Run the helper to start ngrok and configure Twilio
 
-2. Update the Twilio Webhook:
+```bash
+python setup_ngrok_twilio.py
+```
 
-   - Go to your Twilio phone number's configuration page
-   - Under "Voice Configuration", in the "A call comes in" section:
-     - Select "Webhook" from the dropdown
-     - Enter your ngrok URL: `https://your-ngrok-url.ngrok.io`
-     - Ensure "HTTP POST" is selected
-   - Click Save at the bottom of the page
- 
-### Terminal 2: Server Setup
+- Choose which Twilio number to use.
+- The helper starts ngrok, updates your Twilio webhook, and prints a command to run the bot with the correct `--proxy` (ngrok host).
+- It also prints a command you can use to place an outbound call.
 
-1. Create `.env` and add your API keys
+5) In a new terminal, run the bot command from the helper output
 
-   ```bash
-   cp env.example .env
-   # Edit .env and fill in:
-   # DEEPGRAM_API_KEY=...
-   # CARTESIA_API_KEY=...
-   # CEREBRAS_API_KEY=...   # or OPENAI_API_KEY if you switch models
-   # TWILIO_ACCOUNT_SID=... # optional but recommended
-   # TWILIO_AUTH_TOKEN=...  # optional but recommended
-   ```
+```bash
+python bot.py --transport twilio --proxy <ngrok-host>
+```
 
-2. Create a virtual environment and install dependencies
+Inbound calls to your Twilio number will now connect to the bot.
 
-   ```bash
-   python -m venv .venv
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-   pip install -r requirements.txt
-   ```
+For outbound calls, run the printed command, for example:
 
-3. Configure ngrok + Twilio (guided helper)
-
-   ```bash
-   python setup_ngrok_twilio.py
-   ```
-
-   - Pick the Twilio number you want to use
-   - The script starts ngrok and prints the public URL
-   - It updates your Twilio number to POST to `https://<ngrok-host>/`
-   - It optionally writes `PIPECAT_PROXY_HOST=<ngrok-host>` to `.env`
-
-4. Run the bot using the printed ngrok host
-
-   ```bash
-   python bot.py --transport twilio --proxy <ngrok-host>
-   ```
-
-   > Using `uv`? Run using: `uv run bot.py --transport twilio --proxy <ngrok-host>`
-
-   > 💡 First run note: The initial startup may take ~15 seconds as Pipecat downloads required models, like the Silero VAD model.
+```bash
+python outbound.py --to +15551234567 --from +15557654321 --proxy <ngrok-host>
+```
 
 ### Test Your Phone Bot
 
