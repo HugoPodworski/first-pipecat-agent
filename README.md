@@ -22,6 +22,9 @@ cd first-pipecat-agent
 
 ```bash
 cp env.example .env
+```
+
+```bash
 # Fill in .env with your keys:
 # DEEPGRAM_API_KEY=...
 # CARTESIA_API_KEY=...
